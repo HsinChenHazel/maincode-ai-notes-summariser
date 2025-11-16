@@ -3,7 +3,7 @@ import { NoteInput } from './components/NoteInput';
 import { NoteHistoryPanel } from './components/NoteHistory';
 import { Note, ApiError } from './types';
 import './App.css';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar } from './components/ui/Sidebar';
 import { RefreshIcon, CopyIcon, InfoIcon, CloseIcon } from './components/icons';
 import { TypewriterText } from './components/TypewriterText';
 

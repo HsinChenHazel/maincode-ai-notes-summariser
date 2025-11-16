@@ -1,4 +1,8 @@
 import { ClearIcon } from './icons';
+import { Button } from '@/components/ui/Button';
+import { Textarea } from '@/components/ui/Textarea';
+import { Card } from '@/components/ui/Card';
+import { cn } from '@/utils/cn';
 
 interface NoteInputProps {
   value: string;
@@ -21,54 +25,56 @@ export const NoteInput = ({
   isSubmitting,
   className,
 }: NoteInputProps) => {
-  const containerClasses = [
-    'flex min-h-0 flex-1 flex-col rounded-2xl border border-[#dddddd] bg-white p-5 shadow-sm',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
 
   return (
-    <div className={containerClasses}>
-      <label htmlFor="note-input" className="sr-only">
-        Enter your notes
-      </label>
+    <Card className={cn('min-h-0 flex-1', className)}>
       <div className="flex min-h-0 flex-1">
-        <textarea
+        <Textarea
           id="note-input"
+          label="Enter your notes"
+          srOnlyLabel={true}
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={onChange}
           placeholder="Drop your notes here (e.g., meeting notes, ideas, articles...)"
           maxLength={maxCharacters}
           disabled={isSubmitting}
-          className="h-full w-full flex-1 resize-none overflow-y-auto rounded-xl border border-transparent px-4 py-3 text-base text-[#181818] outline-none transition focus:border-[#0065d9] focus:ring-2 focus:ring-[#d3dfed] disabled:cursor-not-allowed disabled:bg-[#f2f2f2]"
+          size="md"
         />
       </div>
       <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-sm text-[#797979]">
+        <span className="text-sm text-text-tertiary">
           {characterCount} / {maxCharacters} characters
         </span>
         <div className="flex gap-2 self-end sm:self-auto">
-          <button
+          {/* Clear button：secondary variant */}
+          <Button
             type="button"
             onClick={onClear}
             disabled={!value}
-            className="flex items-center gap-2 rounded-lg border border-[#0065d9] px-4 py-2 text-sm font-medium text-[#0065d9] transition disabled:border-[#b3b3b3] disabled:text-[#b3b3b3] disabled:opacity-70"
+            variant="secondary"
+            size="md"
+            className="disabled:opacity-70"
+            icon={<ClearIcon className="h-5 w-5" />}
+            iconPosition="left"
           >
-            <ClearIcon className="h-5 w-5" />
             Clear
-          </button>
-          <button
+          </Button>
+
+          {/* Generate Summary：primary variant */}
+          <Button
             type="button"
             onClick={onSubmit}
             disabled={!value.trim() || isSubmitting}
-            className="flex items-center gap-2 rounded-lg bg-[#0065d9] px-4 py-2 text-sm font-medium text-white transition enabled:hover:bg-[#0052b3] disabled:bg-[#cfd8e6] disabled:text-white/80"
+            loading={isSubmitting}
+            variant="primary"
+            size="md"
+            className="disabled:opacity-80"
           >
             Generate Summary
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
