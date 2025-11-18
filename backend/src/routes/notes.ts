@@ -22,9 +22,9 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Generate summary using Ollama
-    let summary: string;
+    let summaryResult: { title: string; summary: string };
     try {
-      summary = await ollamaService.generateSummary(content);
+      summaryResult = await ollamaService.generateSummary(content);
     } catch (error) {
       // If model not found, try to pull it
       if (error instanceof Error && error.message.includes('not found')) {
@@ -32,7 +32,7 @@ router.post('/', async (req: Request, res: Response) => {
         try {
           await ollamaService.ensureModel();
           // Retry generating summary
-          summary = await ollamaService.generateSummary(content);
+          summaryResult = await ollamaService.generateSummary(content);
         } catch (pullError) {
           console.error('Failed to pull model:', pullError);
           return res.status(503).json({ 
@@ -53,7 +53,8 @@ router.post('/', async (req: Request, res: Response) => {
     const note: Note = {
       id: uuidv4(),
       content: content.trim(),
-      summary: summary,
+      title: summaryResult.title,
+      summary: summaryResult.summary,
       createdAt: new Date().toISOString(),
     };
 

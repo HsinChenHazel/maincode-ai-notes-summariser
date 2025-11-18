@@ -6,6 +6,12 @@ import './App.css';
 import { Sidebar } from './components/ui/Sidebar';
 import { RefreshIcon, CopyIcon, InfoIcon, CloseIcon } from './components/icons';
 import { TypewriterText } from './components/TypewriterText';
+import { Button } from './components/ui/Button';
+import { Card } from './components/ui/Card';
+import { SummaryPanel } from './components/SummaryPanel';
+import { WarningDialog } from './components/ui/WarningDialog';
+import { cn } from './utils/cn';
+
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 const MAX_CHAR_COUNT = 10000;
@@ -20,7 +26,10 @@ function App() {
   const [activeView, setActiveView] = useState<AppView>('home');
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
   const [showOriginalNoteOverlay, setShowOriginalNoteOverlay] = useState(false);
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<AppView | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     fetchNotes();
@@ -77,6 +86,16 @@ function App() {
     if (!trimmed || isLoading) {
       return;
     }
+
+    // Cancel any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     setIsLoading(true);
     setError(null);
     setCurrentNote(null);
@@ -88,7 +107,13 @@ function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ content }),
+        signal: abortController.signal,
       });
+
+      // Check if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
 
       if (!response.ok) {
         const errorData: ApiError = await response.json();
@@ -96,16 +121,37 @@ function App() {
       }
 
       const data = await response.json();
+
+      // Check again if request was aborted before updating state
+      if (abortController.signal.aborted) {
+        return;
+      }
+
       setCurrentNote(data.note);
       setSelectedHistoryId(data.note.id);
       await fetchNotes(); // Refresh notes list
     } catch (err) {
+      // Don't show error if request was aborted
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
+      // Check if abort controller was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(errorMessage);
       console.error('Error submitting note:', err);
     } finally {
-      setIsLoading(false);
-      setActiveView('home');
+      // Only update loading state and view if request wasn't aborted
+      if (!abortController.signal.aborted) {
+        setIsLoading(false);
+        setActiveView('home');
+      }
+      // Clear abort controller reference if this was the current request
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -121,16 +167,36 @@ function App() {
     [notes, selectedHistoryId]
   );
 
+  // Helper function to get title from note (prefers note.title, falls back to content extraction)
+  const getTitleFromNote = (note: Note) => {
+    // Use note.title if available (new notes), otherwise extract from content (old notes)
+    if (note.title) {
+      return note.title;
+    }
+    
+    // Fallback: Extract title from content for backward compatibility
+    const trimmed = note.content.trim();
+    if (!trimmed) return 'Untitled Note';
+    const firstSentence = trimmed.split('\n')[0];
+    return firstSentence.length > 60 ? `${firstSentence.slice(0, 57)}...` : firstSentence;
+  };
+
   const isEditing = !isLoading && !currentNote;
   const characterCount = noteContent.length;
   const displayedNoteContent = currentNote?.content ?? noteContent;
   const canCreateNew = Boolean(currentNote && !isLoading && !error);
 
   const handleNewSummary = () => {
+    // Cancel any ongoing request when creating new summary
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setCurrentNote(null);
     setNoteContent('');
     setError(null);
     setSelectedHistoryId(null);
+    setIsLoading(false);
     setActiveView('home');
   };
 
@@ -161,13 +227,30 @@ function App() {
   };
 
   const handleSidebarChange = (view: AppView) => {
+    // Check if user is trying to navigate away while generating
+    const isGenerating = isLoading && !currentNote;
+    
+    if (isGenerating && view === 'history') {
+      // Show warning dialog instead of navigating
+      setPendingNavigation(view);
+      setShowWarningDialog(true);
+      return;
+    }
+
+    // Normal navigation
     setActiveView(view);
     if (view === 'home') {
+      // Cancel any ongoing request when navigating to Home
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       // Reset to default starting state when navigating to Home
       setCurrentNote(null);
       setNoteContent('');
       setError(null);
       setSelectedHistoryId(null);
+      setIsLoading(false); // Ensure loading is reset
     } else if (view === 'history' && notes.length) {
       if (selectedHistoryId) {
         const note = notes.find((item) => item.id === selectedHistoryId) || notes[0];
@@ -179,10 +262,52 @@ function App() {
     }
   };
 
+  const handleWarningConfirm = () => {
+    // User confirmed leaving - cancel ongoing request and reset generating state
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    
+    setIsLoading(false);
+    setNoteContent('');
+    setError(null);
+    setCurrentNote(null);
+    setShowWarningDialog(false);
+    
+    if (pendingNavigation) {
+      setActiveView(pendingNavigation);
+      if (pendingNavigation === 'history' && notes.length) {
+        if (selectedHistoryId) {
+          const note = notes.find((item) => item.id === selectedHistoryId) || notes[0];
+          setCurrentNote(note);
+        } else {
+          setSelectedHistoryId(notes[0].id);
+          setCurrentNote(notes[0]);
+        }
+      }
+      setPendingNavigation(null);
+    }
+  };
+
+  const handleWarningCancel = () => {
+    // User cancelled - stay on current page
+    setShowWarningDialog(false);
+    setPendingNavigation(null);
+  };
+
   const renderHomeContent = () => {
-    if (isEditing) {
-      return (
-        <div className="flex h-full min-h-0 flex-col gap-4">
+    return (
+      <div className="relative h-full min-h-0">
+        {/* Editing State - Single Column */}
+        <div
+          className={cn(
+            'absolute inset-0 flex h-full min-h-0 flex-col gap-4 transition-all duration-[600ms] ease-out',
+            isEditing
+              ? 'opacity-100 pointer-events-auto'
+              : 'opacity-0 pointer-events-none -translate-x-4'
+          )}
+        >
           <NoteInput
             value={noteContent}
             onChange={(value) => setNoteContent(value.slice(0, MAX_CHAR_COUNT))}
@@ -193,113 +318,43 @@ function App() {
             isSubmitting={isLoading}
             className="min-h-0"
           />
-          {error && (
-            <div className="shrink-0 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {error && (      
+            <div className="shrink-0 rounded-lg border border-status-error bg-status-error-light p-4 text-sm text-status-error">
               {error}
             </div>
           )}
         </div>
-      );
-    }
 
-    const renderSummaryContent = () => {
-      if (isLoading) {
-        const shimmerWidths = [
-          '55%',
-          '50%',
-          '78%',
-          '76%',
-          '74%',
-          '85%',
-          '83%',
-          '81%',
-          '92%',
-          '90%',
-          '88%',
-          '86%',
-        ];
-
-        return (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5 text-sm text-[#6f6f6f]">
-              <p className="text-base">Generating summary…</p>
-              <p>(This usually takes 10-15 seconds.)</p>
-            </div>
-            <div className="flex flex-col gap-2">
-              {shimmerWidths.map((width, index) => (
-                <div
-                  key={index}
-                  className="shimmer-block"
-                  style={{ width, height: '13px' }}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      }
-      if (error) {
-        return (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        );
-      }
-      if (currentNote) {
-        return (
-          <TypewriterText
-            key={currentNote.id}
-            text={currentNote.summary}
-            className="whitespace-pre-wrap leading-relaxed"
-          />
-        );
-      }
-      return <p className="text-[#797979]">Enter notes above to generate an AI-powered summary.</p>;
-    };
-
-    return (
-      <div className="grid h-full min-h-0 gap-3 md:grid-cols-[minmax(0,440px)_1fr] md:gap-3">
-        <div className="flex h-full min-h-0 flex-col rounded-2xl bg-[#f2f2f2] p-5 shadow-sm">
-          <p className="mb-3 shrink-0 text-lg font-medium text-black">Your Note</p>
-          <div className="flex-1 overflow-y-auto whitespace-pre-wrap text-base text-[#181818] text-opacity-70">
-            {displayedNoteContent || 'No note content available.'}
-          </div>
-        </div>
-        <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-2">
-            <p className="text-lg font-medium text-black">AI Summary</p>
-            {!isLoading && currentNote && <InfoIcon className="h-5 w-5 text-[#acacac]" />}
-          </div>
-
-          <div
-            key={currentNote ? currentNote.id : isLoading ? 'loading' : 'empty'}
-            className="mt-3 flex-1 overflow-y-auto text-base text-[#181818]"
-          >
-            {renderSummaryContent()}
-          </div>
-
-          {!isLoading && currentNote && (
-            <div className="mt-5 flex shrink-0 flex-wrap justify-end gap-2">
-               <button
-                type="button"
-                onClick={handleCopySummary}
-                className="flex items-center gap-2 rounded-lg border border-transparent bg-[#0065d9] px-3 py-2
-  text-white transition hover:bg-[#0052b3]"
-                aria-label="Copy summary to clipboard"
-              >
-                <CopyIcon className="h-5 w-5" />
-                <span className="sr-only">Copy summary</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleRegenerate}
-                className="flex items-center gap-2 rounded-lg border border-transparent bg-[#0065d9] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#0052b3]"
-              >
-                <RefreshIcon className="h-5 w-5" />
-                Regenerate
-              </button>
-
-            </div>
+        {/* Generating/Summary State - Two Column Grid */}
+        <div
+          className={cn(
+            'absolute inset-0 grid h-full min-h-0 gap-3 transition-all duration-[600ms] ease-out md:grid-cols-[minmax(0,440px)_1fr] md:gap-3',
+            isEditing
+              ? 'opacity-0 pointer-events-none translate-x-4'
+              : 'opacity-100 pointer-events-auto'
           )}
+        >
+          <Card className="flex h-full min-h-0 flex-col bg-background-tertiary">
+            <p className="mb-3 shrink-0 text-lg font-medium text-text-primary">
+              Your Note
+            </p>
+            <div className="flex-1 overflow-y-auto whitespace-pre-wrap text-base text-text-primary/70">
+              {displayedNoteContent || 'No note content available.'}
+            </div>
+          </Card>
+
+          <div className={cn(
+            'flex h-full min-h-0 flex-col transition-all duration-[600ms] ease-out',
+            isEditing ? 'opacity-0 translate-x-4 scale-95' : 'opacity-100 translate-x-0 scale-100'
+          )}>
+            <SummaryPanel
+              currentNote={currentNote}
+              isLoading={isLoading}
+              error={error}
+              onRegenerate={handleRegenerate}
+              onCopySummary={handleCopySummary}
+            />
+          </div>
         </div>
       </div>
     );
@@ -315,63 +370,60 @@ function App() {
           setCurrentNote(note);
         }}
       />
-      <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white p-5 shadow-sm">
+      <Card className="flex h-full min-h-0 flex-col">
         {selectedHistoryNote ? (
           <>
-            <p className="shrink-0 text-lg font-medium text-black">
-              {selectedHistoryNote.summary.substring(0, 60) || 'Saved Summary'}
-            </p>
-            <div className="mt-3 flex-1 overflow-y-auto whitespace-pre-wrap text-base text-[#181818]">
+            {/* <p className="shrink-0 text-lg font-medium text-text-primary">
+              Summary
+            </p> */}
+
+            <div className="flex-1 overflow-y-auto whitespace-pre-wrap text-base text-text-primary">
+              {selectedHistoryNote.title && (
+                <h3 className="mb-3 text-lg font-semibold text-text-primary">
+                  {selectedHistoryNote.title}
+                </h3>
+              )}
               {selectedHistoryNote.summary}
             </div>
+
             <div className="mt-5 flex shrink-0 flex-wrap justify-end gap-2">
-              <button
+              <Button
                 type="button"
-                disabled
-                className="flex items-center gap-2 rounded-lg border border-[#0065d9] px-4 py-2 text-sm font-medium text-[#0065d9] opacity-60"
-              >
-                Remove from History
-              </button>
-              <button
-                type="button"
+                variant="secondary"
+                size="md"
                 onClick={handleShowOriginalNote}
-                className="flex items-center gap-2 rounded-lg border border-[#0065d9] px-4 py-2 text-sm font-medium text-[#0065d9] transition hover:bg-[#f9fcff]"
               >
                 Original Note
-              </button>
-              <button
-                type="button"
-                onClick={handleCopySummary}
-                className="flex items-center gap-2 rounded-lg border border-transparent bg-[#0065d9] px-3 py-2 text-sm font-medium text-white transition hover:bg-[#0052b3]"
-              >
-                <CopyIcon className="h-5 w-5" />
-                <span className="sr-only">Copy summary</span>
-              </button>
+              </Button>
             </div>
           </>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center text-center text-[#797979]">
+          <div className="flex h-full flex-col items-center justify-center text-center text-text-tertiary">
             <p className="text-base">No past summaries yet.</p>
           </div>
         )}
-      </div>
+      </Card>
+
     </div>
   );
 
   return (
-    <div className="flex h-screen flex-col bg-[#f8f9fa]">
+    <div className="flex h-screen flex-col bg-background-secondary">
       <header className="shrink-0 px-6 py-6 md:px-10 md:py-8">
         <div className="mx-auto max-w-6xl">
-          <h1 className="font-['Inria_Serif',serif] text-3xl font-normal text-black md:text-[32px]">
+          <h1 className="font-['Inria_Serif',serif] text-3xl font-normal text-text-primary md:text-[32px]">
             AI Notes Summariser
           </h1>
-          <p className="mt-1 text-base text-black/70 md:text-lg">Drop a note. Get the gist. In seconds.</p>
+          <p className="mt-1 text-base text-text-secondary md:text-lg">
+            Drop a note. Get the gist. In seconds.
+          </p>
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden px-4 pb-6 md:px-10 md:pb-8">
-        <div className="mx-auto flex h-full max-w-6xl flex-col gap-4 overflow-hidden md:flex-row">
-          <div className="shrink-0 md:pr-3">
+
+      <main className="flex-1 overflow-x-hidden overflow-y-hidden px-4 pb-6 md:px-10 md:pb-8">
+        <div className="mx-auto flex h-full max-w-6xl flex-col gap-4 overflow-x-hidden overflow-y-hidden md:flex-row">
+          <div className="shrink-0 p-3 md:pr-3">
             <Sidebar
               activeView={activeView}
               onChange={handleSidebarChange}
@@ -379,41 +431,55 @@ function App() {
               canCreateNew={canCreateNew}
             />
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-x-hidden overflow-y-hidden p-3">
             {activeView === 'home' ? renderHomeContent() : renderHistoryContent()}
           </div>
         </div>
       </main>
 
-      <footer className="shrink-0 pb-6 text-center text-sm text-[#797979] md:pb-8">
+      <footer className="shrink-0 pb-6 text-center text-sm text-text-tertiary md:pb-8">
         Powered by Ollama with llama3.2:3b
       </footer>
 
+      {/* Original Note Overlay */}
       {showOriginalNoteOverlay && selectedHistoryNote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background-overlay p-4">
           <div
             ref={overlayRef}
-            className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-[#fcfcfc] shadow-lg"
+            className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-background-primary shadow-lg"
           >
             <div className="flex shrink-0 items-center justify-between gap-3 p-5 pb-0">
-              <p className="text-lg font-medium text-black">Your Note</p>
-              <button
+              <p className="text-lg font-medium text-text-primary">Your Note</p>
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
+                iconOnly
                 onClick={handleCloseOriginalNoteOverlay}
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#141414] transition hover:bg-[#f2f2f2]"
+                className="rounded-full"
                 aria-label="Close overlay"
-              >
-                <CloseIcon className="h-6 w-6" />
-              </button>
+                icon={<CloseIcon className="h-5 w-5" />}
+              />
             </div>
             <div className="flex-1 overflow-y-auto px-5 pb-5 pt-3">
-              <p className="whitespace-pre-wrap text-base leading-[1.6] text-[#141414]">
+              <p className="whitespace-pre-wrap text-base leading-[1.6] text-text-primary">
                 {selectedHistoryNote.content}
               </p>
             </div>
           </div>
         </div>
       )}
+
+      {/* Warning Dialog for Navigation During Generation */}
+      <WarningDialog
+        isOpen={showWarningDialog}
+        onConfirm={handleWarningConfirm}
+        onCancel={handleWarningCancel}
+        title="Leave Generation?"
+        message="Leaving now will stop the summary generation and your progress will be lost."
+        confirmLabel="Leave"
+        cancelLabel="Stay"
+      />
     </div>
   );
 }

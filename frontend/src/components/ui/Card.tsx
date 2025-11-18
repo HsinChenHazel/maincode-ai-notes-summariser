@@ -16,6 +16,7 @@ export const Card: React.FC<CardProps> = ({
       className={cn(
         'flex flex-col rounded-card border bg-background-primary p-5 shadow',
         'border-border-DEFAULT',
+        'transition-all duration-[600ms] ease-out',
         variant === 'subtle' && 'shadow-sm',
         variant === 'borderless' && 'border-none shadow-none',
         className

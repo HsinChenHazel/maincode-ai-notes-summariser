@@ -62,7 +62,7 @@ export const buttonVariants = cva(
         ],
         ghost: [
           'bg-transparent',
-          'text-primary',
+          'text-text-primary',
           'hover:bg-secondary-light',
           'active:bg-secondary',
         ],
@@ -242,41 +242,3 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = 'Button';
-
-/**
- * Usage Examples:
- * 
- * // Primary button
- * <Button variant="primary">Generate Summary</Button>
- * 
- * // Secondary button
- * <Button variant="secondary">Clear</Button>
- * 
- * // With icon (left)
- * <Button variant="primary" icon={<PlusIcon />}>
- *   New Summary
- * </Button>
- * 
- * // With icon (right)
- * <Button variant="primary" icon={<ArrowIcon />} iconPosition="right">
- *   Continue
- * </Button>
- * 
- * // Icon only
- * <Button variant="ghost" icon={<CloseIcon />} />
- * 
- * // Loading state
- * <Button variant="primary" loading>
- *   Generating...
- * </Button>
- * 
- * // Disabled
- * <Button variant="primary" disabled>
- *   Disabled
- * </Button>
- * 
- * // Custom classes (merged with variants)
- * <Button variant="primary" className="w-full">
- *   Full Width
- * </Button>
- */

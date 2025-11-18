@@ -2,6 +2,7 @@ import { ClearIcon } from './icons';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
 import { Card } from '@/components/ui/Card';
+import { CharacterCount } from '@/components/ui/CharacterCount';
 import { cn } from '@/utils/cn';
 
 interface NoteInputProps {
@@ -42,9 +43,10 @@ export const NoteInput = ({
         />
       </div>
       <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-sm text-text-tertiary">
-          {characterCount} / {maxCharacters} characters
-        </span>
+        <CharacterCount
+          characterCount={characterCount}
+          maxCharacters={maxCharacters}
+        />
         <div className="flex gap-2 self-end sm:self-auto">
           {/* Clear button：secondary variant */}
           <Button

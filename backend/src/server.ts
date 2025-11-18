@@ -7,7 +7,7 @@ import { OllamaService } from './services/ollama';
 dotenv.config();
 
 const app: Express = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 505;
 
 // Middleware
 app.use(cors());

@@ -75,14 +75,14 @@ export const colors = {
   // System feedback colors (success, error, warning, info)
   status: {
     success: {
-      DEFAULT: '#10b981',
-      light: '#d1fae5',
+      DEFAULT: '#16AB4D',
+      light: '#B2F8B5',
       dark: '#047857',
     },
     error: {
-      DEFAULT: '#ef4444',
-      light: '#fee2e2',
-      dark: '#dc2626',
+      DEFAULT: '#EF2727',
+      light: '#FFCFCF',
+      dark: '#B71616',
     },
     warning: {
       DEFAULT: '#f59e0b',

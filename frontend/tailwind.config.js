@@ -114,7 +114,26 @@ export default {
       transitionDuration: {
         DEFAULT: '200ms',
       },
+      
+      // ===== ANIMATIONS =====
+      keyframes: {
+        'fade-in-slide': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateX(20px) scale(0.98)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateX(0) scale(1)',
+          },
+        },
+      },
+      animation: {
+        'fade-in-slide': 'fade-in-slide 600ms ease-out',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/line-clamp'),
+  ],
 };

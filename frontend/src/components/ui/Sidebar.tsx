@@ -45,7 +45,7 @@ export const Sidebar = ({
                 }}
                 aria-pressed={isActive}
                 aria-label={label}
-                icon={<Icon className="h-5 w-5" />}
+                icon={<Icon className={cn("h-5 w-5", isActive && view === 'home' && "text-primary")} />}
                 className={cn(
                     isActive && 'bg-secondary text-primary-dark'
                   )}
