@@ -1,7 +1,5 @@
 import { useRef, useEffect } from 'react';
 import { Button } from './Button';
-import { Card } from './Card';
-import { cn } from '@/utils/cn';
 
 interface WarningDialogProps {
   isOpen: boolean;

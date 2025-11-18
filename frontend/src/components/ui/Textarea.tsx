@@ -1,5 +1,5 @@
 // frontend/src/components/ui/Textarea.tsx
-import React, { forwardRef, TextareaHTMLAttributes } from 'react';
+import { forwardRef, TextareaHTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 

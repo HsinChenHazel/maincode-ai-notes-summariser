@@ -1,92 +1,167 @@
-# AI Notes Summarizer
+# AI Notes Summarizer 📝✨
 
 A demo-quality web application that allows users to capture free-form notes and generate concise AI-powered summaries using Ollama.
 
-## Quick Start
+![Performance](https://img.shields.io/badge/Performance-95-brightgreen)
+![Accessibility](https://img.shields.io/badge/Accessibility-95-brightgreen)
+![Best Practices](https://img.shields.io/badge/Best%20Practices-100-brightgreen)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+
+---
+
+## 📸 Screenshots
+
+![Main Interface](./screenshots/main-interface.png)
+*Clean, intuitive interface for capturing notes*
+
+<details>
+<summary>View more screenshots</summary>
+
+![Main Interface 2](./screenshots/main-interface-2.png)
+![Main Interface 3](./screenshots/main-interface-3.png)
+*Note input and AI summary generation*
+
+![Summary History](./screenshots/summary-example.png)
+*View all past summaries and original notes*
+
+</details>
+
+---
+
+## ✨ Core Features
+
+- 🎯 **AI-Powered Summarization** - Generate concise summaries from free-form notes
+- 📝 **Note History** - View all past summaries and original notes
+- ⚡ **Real-time Generation** - Fast AI processing (~2-3 seconds)
+- 🎨 **Clean UI** - Intuitive, polished interface built with React + Tailwind
+- 🐳 **Fully Dockerized** - One command to start everything
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
 - Docker and Docker Compose installed
-- At least 4GB of available RAM (for Ollama model)
+- At least 4GB of available RAM
 - Modern web browser
 
-### Setup and Usage
+### Installation & Running
 
-1. **Clone or navigate to the project directory:**
-   ```bash
-   cd maincode
-   ```
-
-2. **Start all services with Docker Compose:**
-   ```bash
-   docker-compose up --build
-   ```
-
-   This will:
-   - Pull and start the Ollama service
-   - Download the `llama3.2:3b` model (first time only, ~2GB)
-   - Build and start the backend API
-   - Build and start the frontend application
-
-3. **Access the application:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
-   - Health Check: http://localhost:5000/health
-
-4. **Stop the services:**
-   ```bash
-   docker-compose down
-   ```
-
-   To remove volumes (deleting stored notes and Ollama models):
-   ```bash
-   docker-compose down -v
-   ```
-
-## Architecture Overview
-
-### System Components
-
-```
-┌─────────────┐      HTTP REST      ┌─────────────┐
-│   Frontend  │ ◄──────────────────► │   Backend   │
-│  (React)    │                     │  (Express)  │
-│  Port 3000  │                     │  Port 5000  │
-└─────────────┘                     └──────┬──────┘
-                                           │
-                                           │ HTTP REST
-                                           │
-                                    ┌──────▼──────┐
-                                    │   Ollama    │
-                                    │  Port 11434 │
-                                    └─────────────┘
+**1. Clone and navigate to the project:**
+```bash
+git clone <your-repo-url>
+cd maincode
 ```
 
-### Technology Stack
+**2. Start all services:**
+```bash
+docker-compose up --build -d
+```
 
-**Frontend:**
+This single command will:
+- ✅ Pull and start Ollama service
+- ✅ Download the llama3.2:3b model (~2GB, first time only)
+- ✅ Build and start the backend API
+- ✅ Build and start the frontend
+
+**3. Access the application:**
+
+Wait 2-3 minutes for the model to download (first time only), then open:
+
+- **Frontend:** http://localhost:3000
+- **Backend API:** http://localhost:5001
+- **Health Check:** http://localhost:5001/health
+
+**4. Stop the services:**
+```bash
+docker-compose down
+```
+
+To remove all data (notes and models):
+```bash
+docker-compose down -v
+```
+
+### Optional: Manual Model Pull
+
+If you want to ensure the model is ready before using the app:
+```bash
+docker exec -it ai-notes-ollama ollama pull llama3.2:3b
+```
+
+---
+
+## 🛠️ Built With
+
+### Frontend
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+
+### Backend
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+
+### AI & Infrastructure
+![Ollama](https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
+
+---
+
+## 🏗️ Architecture
+
+### System Overview
+
+```
+┌─────────────────┐      HTTP REST       ┌─────────────────┐
+│    Frontend     │ ◄──────────────────► │     Backend     │
+│     (React)     │                      │    (Express)    │
+│   Port 3000     │                      │    Port 5001    │
+└─────────────────┘                      └────────┬────────┘
+                                                  │
+                                                  │ HTTP REST
+                                                  │
+                                           ┌──────▼──────┐
+                                           │   Ollama    │
+                                           │ Port 11434  │
+                                           └─────────────┘
+```
+
+### Technology Details
+
+**Frontend**
 - React 18 with TypeScript
 - Vite for fast development and building
 - Tailwind CSS for styling
-- Modern hooks for state management
+- Modern React hooks for state management
+- Nginx for production serving
 
-**Backend:**
+**Backend**
 - Node.js with Express
 - TypeScript for type safety
 - JSON file-based storage (simple persistence)
+- RESTful API design
 
-**AI Backend:**
+**AI Backend**
 - Ollama with llama3.2:3b model
 - REST API integration
+- Auto-download model on first use
+- Structured output (title + summary generation)
+- Robust JSON parsing with multiple fallback strategies
 
-**Infrastructure:**
+**Infrastructure**
 - Docker Compose for orchestration
 - Multi-container setup (frontend, backend, ollama)
-- Nginx for serving frontend in production
+- Docker networks for service isolation
+- Named volumes for data persistence
 
 ### API Endpoints
 
-#### POST `/api/notes`
+#### `POST /api/notes`
 Create a new note and generate AI summary.
 
 **Request:**
@@ -102,235 +177,248 @@ Create a new note and generate AI summary.
   "note": {
     "id": "uuid",
     "content": "Your note content here...",
+    "title": "Generated Title",
     "summary": "AI-generated summary...",
     "createdAt": "2024-01-01T00:00:00.000Z"
   }
 }
 ```
 
-#### GET `/api/notes`
+#### `GET /api/notes`
 Retrieve all stored notes.
 
-**Response:**
-```json
-{
-  "notes": [
-    {
-      "id": "uuid",
-      "content": "...",
-      "summary": "...",
-      "createdAt": "..."
-    }
-  ]
-}
-```
-
-#### GET `/api/notes/:id`
+#### `GET /api/notes/:id`
 Retrieve a specific note by ID.
 
-**Response:**
-```json
-{
-  "note": {
-    "id": "uuid",
-    "content": "...",
-    "summary": "...",
-    "createdAt": "..."
-  }
-}
-```
+#### `GET /health`
+Health check endpoint that reports Ollama connection status.
 
-#### GET `/health`
-Health check endpoint that also reports Ollama connection status.
+---
 
-## Design and Technical Trade-offs
+## 📊 Performance
+
+![Lighthouse Performance Scores](./screenshots/lighthouse-scores.png)
+
+- **Performance:** 95/100
+- **Accessibility:** 95/100
+- **Best Practices:** 100/100
+- **SEO:** 82/100
+
+---
+
+## 🎨 Design
+
+View the complete design system and component specifications:
+- **[Figma Design File](https://www.figma.com/design/HNf3tdmmzFiP8YHTwXiVSX/Note-Summary?node-id=0-1&t=f6IfH9mgvYlPthQh-1)**
+
+Includes wireframes, component specifications, and design tokens.
+
+---
+
+## 🎯 Key Design Decisions & Trade-offs
 
 ### 1. JSON Storage vs Database
 
-**Choice:** JSON file-based storage
+**Decision:** JSON file-based storage
 
 **Rationale:**
-- Simplicity for demo purposes
-- No additional database setup required
+- Simple setup with no database dependencies
 - Easy to inspect and reset data
-- Sufficient for low-volume demo scenarios
+- Sufficient for demo scenarios
 
-**Trade-off:**
+**Trade-offs:**
 - Would need PostgreSQL/SQLite for production
 - No concurrent write safety
 - Limited query capabilities
 
-### 2. Single vs Multi-Container Setup
+### 2. Multi-Container Architecture
 
-**Choice:** Multi-container Docker Compose setup
+**Decision:** Separate containers for frontend, backend, and Ollama
 
 **Rationale:**
 - Service isolation and independent scaling
 - Clear separation of concerns
-- Easy to replace individual services
-- Better for production-like environment
+- Each service can be developed/deployed independently
 
-**Trade-off:**
-- Slightly more complex than single container
+**Trade-offs:**
+- More complex than single container
 - Requires Docker Compose
-- More network overhead
+- Slight network overhead
 
 ### 3. Model Selection: llama3.2:3b
 
-**Choice:** llama3.2:3b
+**Decision:** Use llama3.2:3b model
 
 **Rationale:**
-- Good balance between quality and speed
-- Runs efficiently on consumer hardware (4GB+ RAM)
-- Fast inference for real-time interaction
-- Good summarization capabilities
-- 3B parameters provide sufficient context understanding
+- **Optimal balance** of quality and speed
+- Runs on consumer hardware (4GB+ RAM)
+- Fast inference (~2-3 seconds)
+- Excellent for summarization tasks
+- Small download size (~2GB)
 
-**Trade-off:**
-- Larger models (7B, 13B) would provide better quality but require more resources
-- Very small models (1B) would be faster but lower quality
+**Trade-offs:**
+- Larger models (7B+) would give better quality but need more resources
+- Smaller models (1B) would be faster but lower quality
 
-### 4. Streaming vs Non-streaming Responses
+**Why not alternatives?**
+- GPT models require API keys and external dependencies
+- Mistral 7B is larger and slower, overkill for this use case
+- Llama 3.2 has better instruction following than Phi models
 
-**Choice:** Non-streaming (complete response)
+### 4. Non-streaming Responses
+
+**Decision:** Complete responses (non-streaming)
 
 **Rationale:**
 - Simpler implementation
-- Better for demo scenarios
+- Adequate for short summaries (~2-3 second wait)
 - Easier error handling
-- Sufficient for summary generation
+- Good for demo purposes
 
-**Trade-off:**
-- Streaming would provide better UX for long responses
+**Trade-offs:**
+- Streaming would show real-time progress
+- User doesn't see generation in progress
 - Can be added later as enhancement
 
-### 5. Frontend Framework: React
+### 5. React + TypeScript
 
-**Choice:** React with TypeScript
+**Decision:** React 18 with TypeScript
 
 **Rationale:**
-- Mature ecosystem and tooling
-- Excellent developer experience
-- Strong TypeScript support
+- Mature ecosystem with excellent tooling
+- Strong type safety with TypeScript
 - Large community and resources
+- Component reusability
 
-**Trade-off:**
-- Vue or Svelte would work equally well
-- React has larger bundle size than alternatives
-- React's learning curve for new developers
+### 6. Tailwind CSS
 
-### 6. UI Styling: Tailwind CSS
-
-**Choice:** Tailwind CSS utility-first framework
+**Decision:** Tailwind utility-first CSS framework
 
 **Rationale:**
 - Rapid development without custom CSS
 - Consistent design system
 - Small production bundle (with purging)
-- Excellent responsive design utilities
+- Excellent responsive utilities
 
-**Trade-off:**
-- Can be verbose in JSX
-- Requires learning Tailwind classes
-- Less semantic than component-based CSS
+---
 
-## Assumptions Made
+## 📋 Assumptions
 
-1. **Ollama in Docker:** Ollama is run in a Docker container, not as a local installation
-2. **Docker Availability:** Users have Docker and Docker Compose installed
-3. **Browser Support:** Modern browsers with ES6+ support (Chrome, Firefox, Safari, Edge)
-4. **No Authentication:** No user authentication required for demo purposes
-5. **Plain Text Notes:** Notes are plain text only (no markdown formatting in input)
-6. **Single User:** Designed for single-user demo scenarios
-7. **Network Access:** Backend can communicate with Ollama service via Docker network
-8. **Model Availability:** llama3.2:3b model is available via Ollama (auto-downloaded)
+1. Ollama runs in Docker (not local installation)
+2. Docker and Docker Compose are installed
+3. Modern browser with ES6+ support
+4. No authentication required (demo only)
+5. Plain text notes (no markdown in input)
+6. Single-user scenarios
+7. Ports 3000, 5001, and 11434 are available
+8. Backend can communicate with Ollama via Docker network
 
-## Improvements with More Time
+---
 
-### Short-term Enhancements
+## 🚀 Future Improvements
 
-1. **Streaming Responses:** Implement streaming for AI summaries to show progress
-2. **Note Editing:** Allow users to edit existing notes
-3. **Note Deletion:** Add ability to delete notes
-4. **Markdown Support:** Support markdown formatting in notes
-5. **Export Functionality:** Export notes as PDF, Markdown, or JSON
-6. **Search:** Add search functionality for past notes
-7. **Better Error Messages:** More specific error messages for different failure scenarios
+### Short-term (1-2 days)
+- Responsive design for mobile devices
+- Note deletion with confirmation
+- Note editing capability
+- Markdown support in notes/summaries
+- Search and filter for past notes
+- Dark mode toggle
 
-### Medium-term Enhancements
+### Medium-term (1 week)
+- Database migration (PostgreSQL/SQLite)
+- User authentication (JWT)
+- Tags and categories
+- Multiple model selection
+- Custom summarization prompts
+- Rate limiting
+- Response caching
 
-1. **Database Migration:** Replace JSON storage with PostgreSQL or SQLite
-2. **User Authentication:** Add user accounts and authentication
-3. **Tags/Categories:** Organize notes with tags or categories
-4. **Multiple Models:** Allow users to choose different Ollama models
-5. **Custom Prompts:** Allow users to customize the summarization prompt
-6. **Rate Limiting:** Add rate limiting to prevent abuse
-7. **Caching:** Cache summaries for identical or similar notes
-8. **Batch Processing:** Process multiple notes at once
+### Long-term (1+ months)
+- Streaming responses with real-time updates
+- Offline support (service workers)
+- Mobile app (React Native)
+- Cloud deployment (AWS/GCP/Azure)
+- Advanced AI features (sentiment analysis, key points extraction)
+- Collaboration features
+- Integration with Notion, Obsidian, etc.
+- Voice input
+- OCR for images
 
-### Long-term Enhancements
+---
 
-1. **WebSocket Support:** Real-time updates using WebSockets
-2. **Offline Support:** Service worker for offline functionality
-3. **Mobile App:** Native mobile applications
-4. **Cloud Deployment:** Production-ready cloud deployment (AWS, GCP, Azure)
-5. **Analytics:** Usage analytics and insights
-6. **Multi-language Support:** Internationalization (i18n)
-7. **Advanced AI Features:** 
-   - Multiple summary lengths (short, medium, long)
-   - Extract key points / action items
-   - Sentiment analysis
-   - Topic extraction
-8. **Collaboration:** Share notes with other users
-9. **Integration:** Integrate with note-taking apps (Notion, Obsidian, etc.)
-10. **API Keys:** Support for external Ollama instances with API keys
+## 🐛 Troubleshooting
 
-### Performance Optimizations
+### Model Not Loading
 
-1. **Frontend Code Splitting:** Lazy load components
-2. **Backend Caching:** Cache Ollama responses
-3. **Database Indexing:** Proper indexing for queries
-4. **CDN:** Use CDN for static assets
-5. **Compression:** Enable gzip/brotli compression
-6. **Image Optimization:** If adding images later
-
-### Security Enhancements
-
-1. **Input Sanitization:** Enhanced input validation and sanitization
-2. **Rate Limiting:** Prevent abuse and DoS attacks
-3. **CORS Configuration:** Proper CORS settings for production
-4. **HTTPS:** SSL/TLS encryption
-5. **Security Headers:** Add security headers (HSTS, CSP, etc.)
-6. **Audit Logging:** Log security events
-
-## Troubleshooting
-
-### Ollama Model Not Loading
-
-If the model fails to load, you can manually pull it:
+Manually pull the model:
 ```bash
 docker exec -it ai-notes-ollama ollama pull llama3.2:3b
 ```
 
+Verify it's loaded:
+```bash
+docker exec -it ai-notes-ollama ollama list
+```
+
 ### Backend Can't Connect to Ollama
 
-Check that:
-- Ollama service is healthy: `docker-compose ps`
-- Network connectivity: `docker network inspect maincode_ai-notes-network`
-- Ollama is accessible: `curl http://localhost:11434/api/tags`
+Check service health:
+```bash
+docker-compose ps
+docker-compose logs ollama
+```
+
+Test Ollama directly:
+```bash
+curl http://localhost:11434/api/tags
+```
 
 ### Frontend Can't Connect to Backend
 
-Check that:
-- Backend is running: `curl http://localhost:5000/health`
-- CORS is properly configured (should be enabled)
-- Environment variable `VITE_API_URL` is set correctly
+Verify backend is running:
+```bash
+curl http://localhost:5001/health
+docker-compose logs backend
+```
+
+Check browser console for CORS errors.
 
 ### Port Conflicts
 
-If ports 3000, 5000, or 11434 are already in use, modify `docker-compose.yml` to use different ports.
+Modify `docker-compose.yml` to use different ports:
+```yaml
+ports:
+  - "3001:80"      # Frontend
+  - "5002:5000"    # Backend
+  - "11435:11434"  # Ollama
+```
 
-## License
+### Container Won't Start
 
-This is a demo project for educational purposes.
+View logs:
+```bash
+docker-compose logs [service-name]
+```
 
+Rebuild from scratch:
+```bash
+docker-compose down -v
+docker-compose build --no-cache
+docker-compose up
+```
+
+### Slow Performance
+
+Check system resources:
+```bash
+docker stats
+```
+
+Ensure no other heavy processes are running. Consider using a smaller model if needed.
+
+---
+
+## 📝 License
+
+This project was created as a takehome assignment for maincode interview process.

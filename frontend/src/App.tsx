@@ -4,8 +4,7 @@ import { NoteHistoryPanel } from './components/NoteHistory';
 import { Note, ApiError } from './types';
 import './App.css';
 import { Sidebar } from './components/ui/Sidebar';
-import { RefreshIcon, CopyIcon, InfoIcon, CloseIcon } from './components/icons';
-import { TypewriterText } from './components/TypewriterText';
+import { CloseIcon } from './components/icons';
 import { Button } from './components/ui/Button';
 import { Card } from './components/ui/Card';
 import { SummaryPanel } from './components/SummaryPanel';
@@ -31,8 +30,15 @@ function App() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Fake test data - uncomment to test with sample notes
+  // const fakeNotes: Note[] = [
+  // ];
+
   useEffect(() => {
     fetchNotes();
+    
+    // Uncomment below and comment fetchNotes() to use fake data:
+    // setNotes(fakeNotes);
   }, []);
 
   useEffect(() => {
@@ -168,18 +174,18 @@ function App() {
   );
 
   // Helper function to get title from note (prefers note.title, falls back to content extraction)
-  const getTitleFromNote = (note: Note) => {
-    // Use note.title if available (new notes), otherwise extract from content (old notes)
-    if (note.title) {
-      return note.title;
-    }
+  // const getTitleFromNote = (note: Note) => {
+  //   // Use note.title if available (new notes), otherwise extract from content (old notes)
+  //   if (note.title) {
+  //     return note.title;
+  //   }
     
-    // Fallback: Extract title from content for backward compatibility
-    const trimmed = note.content.trim();
-    if (!trimmed) return 'Untitled Note';
-    const firstSentence = trimmed.split('\n')[0];
-    return firstSentence.length > 60 ? `${firstSentence.slice(0, 57)}...` : firstSentence;
-  };
+  //   // Fallback: Extract title from content for backward compatibility
+  //   const trimmed = note.content.trim();
+  //   if (!trimmed) return 'Untitled Note';
+  //   const firstSentence = trimmed.split('\n')[0];
+  //   return firstSentence.length > 60 ? `${firstSentence.slice(0, 57)}...` : firstSentence;
+  // };
 
   const isEditing = !isLoading && !currentNote;
   const characterCount = noteContent.length;

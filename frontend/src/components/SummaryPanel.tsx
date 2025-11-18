@@ -3,7 +3,7 @@ import { Note } from '../types';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { TypewriterText } from '@/components/TypewriterText';
-import { InfoIcon, RefreshIcon, CopyIcon } from '@/components/icons';
+import { InfoIcon, RefreshIcon } from '@/components/icons';
 
 interface SummaryPanelProps {
   currentNote: Note | null;
