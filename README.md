@@ -51,15 +51,19 @@ This single command will:
 -  Build and start the backend API
 -  Build and start the frontend
 
-**3. Access the application:**
+**3. Pull the AI model (recommended for first-time setup):**
+```bash
+docker exec -it ai-notes-ollama ollama pull llama3.2:3b
+```
 
-Wait 2-3 minutes for the model to download (first time only), then open:
+> **Note:** This step is optional but recommended. The model will auto-download on first use if skipped, but manually pulling it ensures a smoother first experience and avoids timeout errors.
 
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:5001
-- **Health Check:** http://localhost:5001/health
+**4. Access the application:**
+   - **Frontend:** http://localhost:3000
+   - **Backend API:** http://localhost:5001
+   - **Health Check:** http://localhost:5001/health
 
-**4. Stop the services:**
+**5. Stop the services:**
 ```bash
 docker-compose down
 ```
@@ -68,14 +72,6 @@ To remove all data (notes and models):
 ```bash
 docker-compose down -v
 ```
-
-### Optional: Manual Model Pull
-
-If you want to ensure the model is ready before using the app:
-```bash
-docker exec -it ai-notes-ollama ollama pull llama3.2:3b
-```
-
 
 ## 🛠️ Built With
 
