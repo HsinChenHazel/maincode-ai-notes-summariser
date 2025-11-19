@@ -1,4 +1,6 @@
-# AI Notes Summarizer 📝✨
+# AI Notes Summarizer ✨
+
+![Main Interface](./screenshots/main-interface.png)
 
 A demo-quality web application that allows users to capture free-form notes and generate concise AI-powered summaries using Ollama.
 
@@ -7,36 +9,24 @@ A demo-quality web application that allows users to capture free-form notes and 
 ![Best Practices](https://img.shields.io/badge/Best%20Practices-100-brightgreen)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue)
 
----
 
-## 📸 Screenshots
+## 📹 Demo Video
 
-![Main Interface](./screenshots/main-interface.png)
-*Clean, intuitive interface for capturing notes*
+[![Watch the Demo](https://cdn.loom.com/sessions/thumbnails/a1f0a9c8efa744b5a5dae93b82ba9ab8-with-play.gif)](https://www.loom.com/share/a1f0a9c8efa744b5a5dae93b82ba9ab8)
 
-<details>
-<summary>View more screenshots</summary>
+*Click to watch the full application demo*
 
-![Main Interface 2](./screenshots/main-interface-2.png)
-![Main Interface 3](./screenshots/main-interface-3.png)
-*Note input and AI summary generation*
 
-![Summary History](./screenshots/summary-example.png)
-*View all past summaries and original notes*
-
-</details>
-
----
 
 ## ✨ Core Features
 
-- 🎯 **AI-Powered Summarization** - Generate concise summaries from free-form notes
-- 📝 **Note History** - View all past summaries and original notes
-- ⚡ **Real-time Generation** - Fast AI processing (~2-3 seconds)
-- 🎨 **Clean UI** - Intuitive, polished interface built with React + Tailwind
-- 🐳 **Fully Dockerized** - One command to start everything
+- **AI-Powered Summarization** - Generate concise summaries from free-form notes
+- **Note History** - View all past summaries and original notes
+- **Real-time Generation** - Fast AI processing (~2-3 seconds)
+- **Clean UI** - Intuitive, polished interface built with React + Tailwind
+- **Fully Dockerized** - One command to start everything
 
----
+
 
 ## 🚀 Quick Start
 
@@ -50,8 +40,8 @@ A demo-quality web application that allows users to capture free-form notes and 
 
 **1. Clone and navigate to the project:**
 ```bash
-git clone <your-repo-url>
-cd maincode
+git clone https://github.com/HsinChenHazel/maincode-ai-notes-summariser.git
+cd maincode-ai-notes-summariser
 ```
 
 **2. Start all services:**
@@ -60,10 +50,10 @@ docker-compose up --build -d
 ```
 
 This single command will:
-- ✅ Pull and start Ollama service
-- ✅ Download the llama3.2:3b model (~2GB, first time only)
-- ✅ Build and start the backend API
-- ✅ Build and start the frontend
+-  Pull and start Ollama service
+-  Download the llama3.2:3b model (~2GB, first time only)
+-  Build and start the backend API
+-  Build and start the frontend
 
 **3. Access the application:**
 
@@ -90,7 +80,6 @@ If you want to ensure the model is ready before using the app:
 docker exec -it ai-notes-ollama ollama pull llama3.2:3b
 ```
 
----
 
 ## 🛠️ Built With
 
@@ -110,9 +99,9 @@ docker exec -it ai-notes-ollama ollama pull llama3.2:3b
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
 
----
 
-## 🏗️ Architecture
+
+## ✏️ Architecture
 
 ### System Overview
 
@@ -193,7 +182,6 @@ Retrieve a specific note by ID.
 #### `GET /health`
 Health check endpoint that reports Ollama connection status.
 
----
 
 ## 📊 Performance
 
@@ -204,7 +192,6 @@ Health check endpoint that reports Ollama connection status.
 - **Best Practices:** 100/100
 - **SEO:** 82/100
 
----
 
 ## 🎨 Design
 
@@ -213,7 +200,6 @@ View the complete design system and component specifications:
 
 Includes wireframes, component specifications, and design tokens.
 
----
 
 ## 🎯 Key Design Decisions & Trade-offs
 
@@ -300,7 +286,6 @@ Includes wireframes, component specifications, and design tokens.
 - Small production bundle (with purging)
 - Excellent responsive utilities
 
----
 
 ## 📋 Assumptions
 
@@ -313,7 +298,6 @@ Includes wireframes, component specifications, and design tokens.
 7. Ports 3000, 5001, and 11434 are available
 8. Backend can communicate with Ollama via Docker network
 
----
 
 ## 🚀 Future Improvements
 
@@ -345,7 +329,6 @@ Includes wireframes, component specifications, and design tokens.
 - Voice input
 - OCR for images
 
----
 
 ## 🐛 Troubleshooting
 
@@ -417,7 +400,6 @@ docker stats
 
 Ensure no other heavy processes are running. Consider using a smaller model if needed.
 
----
 
 ## 📝 License
 
