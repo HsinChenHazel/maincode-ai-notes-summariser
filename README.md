@@ -12,9 +12,9 @@ A demo-quality web application that allows users to capture free-form notes and 
 
 ## 📹 Demo Video
 
-[![Watch the Demo](https://cdn.loom.com/sessions/thumbnails/a1f0a9c8efa744b5a5dae93b82ba9ab8-with-play.gif)](https://www.loom.com/share/a1f0a9c8efa744b5a5dae93b82ba9ab8)
-
-*Click to watch the full application demo*
+<div style="position: relative; padding-bottom: 56.25%; height: 0;">
+  <iframe src="https://www.loom.com/embed/a1f0a9c8efa744b5a5dae93b82ba9ab8" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+</div>
 
 
 
@@ -22,7 +22,7 @@ A demo-quality web application that allows users to capture free-form notes and 
 
 - **AI-Powered Summarization** - Generate concise summaries from free-form notes
 - **Note History** - View all past summaries and original notes
-- **Real-time Generation** - Fast AI processing (~2-3 seconds)
+- **Real-time Generation** - Fast AI processing
 - **Clean UI** - Intuitive, polished interface built with React + Tailwind
 - **Fully Dockerized** - One command to start everything
 
