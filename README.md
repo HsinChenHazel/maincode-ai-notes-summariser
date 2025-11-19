@@ -12,10 +12,7 @@ A demo-quality web application that allows users to capture free-form notes and 
 
 ## 📹 Demo Video
 
-<div style="position: relative; padding-bottom: 56.25%; height: 0;">
-  <iframe src="https://www.loom.com/embed/a1f0a9c8efa744b5a5dae93b82ba9ab8" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
-</div>
-
+**[Watch Full Application Demo on Loom →](https://www.loom.com/share/a1f0a9c8efa744b5a5dae93b82ba9ab8)**
 
 
 ## ✨ Core Features
