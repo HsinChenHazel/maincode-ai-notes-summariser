@@ -1,6 +1,7 @@
 # AI Notes Summarizer ✨
 
 A demo-quality web application that allows users to capture free-form notes and generate concise AI-powered summaries using Ollama.
+
 ![Performance](https://img.shields.io/badge/Performance-95-brightgreen)
 ![Accessibility](https://img.shields.io/badge/Accessibility-95-brightgreen)
 ![Best Practices](https://img.shields.io/badge/Best%20Practices-100-brightgreen)
